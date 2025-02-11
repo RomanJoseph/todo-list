@@ -144,4 +144,3 @@ Após iniciar os containers, acesse:
 ### **Produção**
 ✅ Criar `.env.production`: `cp .env.example .env.production`  
 ✅ Rodar `docker-compose -f docker-compose.prod.yml --env-file .env.production up --build -d`  
----
