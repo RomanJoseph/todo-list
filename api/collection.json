@@ -1,0 +1,2677 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "Your API Title",
+      "description": "Your API Description"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3000"
+      }
+    ],
+    "paths": {
+      "/users": {
+        "get": {
+          "tags": [
+            "User"
+          ],
+          "summary": "List all users",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/User"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "User"
+          ],
+          "summary": "Create a new user",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "User created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "User"
+          ],
+          "summary": "Update a user by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "User updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "User"
+          ],
+          "summary": "Delete a user by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "User deleted"
+            }
+          }
+        }
+      },
+      "/companies": {
+        "get": {
+          "tags": [
+            "Company"
+          ],
+          "summary": "List all companys",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Company"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Company"
+          ],
+          "summary": "Create a new company",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Company"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Company created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Company"
+          ],
+          "summary": "Update a company by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Company"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Company updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Company"
+          ],
+          "summary": "Delete a company by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Company deleted"
+            }
+          }
+        }
+      },
+      "/permissionlevels": {
+        "get": {
+          "tags": [
+            "PermissionLevel"
+          ],
+          "summary": "List all permissionlevels",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/PermissionLevel"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "PermissionLevel"
+          ],
+          "summary": "Create a new permissionlevel",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/PermissionLevel"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "PermissionLevel created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "PermissionLevel"
+          ],
+          "summary": "Update a permissionlevel by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/PermissionLevel"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "PermissionLevel updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "PermissionLevel"
+          ],
+          "summary": "Delete a permissionlevel by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "PermissionLevel deleted"
+            }
+          }
+        }
+      },
+      "/userpermissionlevels": {
+        "get": {
+          "tags": [
+            "UserPermissionLevel"
+          ],
+          "summary": "List all userpermissionlevels",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/UserPermissionLevel"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "UserPermissionLevel"
+          ],
+          "summary": "Create a new userpermissionlevel",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/UserPermissionLevel"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "UserPermissionLevel created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "UserPermissionLevel"
+          ],
+          "summary": "Update a userpermissionlevel by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/UserPermissionLevel"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "UserPermissionLevel updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "UserPermissionLevel"
+          ],
+          "summary": "Delete a userpermissionlevel by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "UserPermissionLevel deleted"
+            }
+          }
+        }
+      },
+      "/assistants": {
+        "get": {
+          "tags": [
+            "Assistant"
+          ],
+          "summary": "List all assistants",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Assistant"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Assistant"
+          ],
+          "summary": "Create a new assistant",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Assistant"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Assistant created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Assistant"
+          ],
+          "summary": "Update a assistant by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Assistant"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Assistant updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Assistant"
+          ],
+          "summary": "Delete a assistant by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Assistant deleted"
+            }
+          }
+        }
+      },
+      "/teams": {
+        "get": {
+          "tags": [
+            "Team"
+          ],
+          "summary": "List all teams",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Team"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Team"
+          ],
+          "summary": "Create a new team",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Team created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Team"
+          ],
+          "summary": "Update a team by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Team updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Team"
+          ],
+          "summary": "Delete a team by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Team deleted"
+            }
+          }
+        }
+      },
+      "/teamsteps": {
+        "get": {
+          "tags": [
+            "TeamStep"
+          ],
+          "summary": "List all teamsteps",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/TeamStep"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "TeamStep"
+          ],
+          "summary": "Create a new teamstep",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/TeamStep"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "TeamStep created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "TeamStep"
+          ],
+          "summary": "Update a teamstep by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/TeamStep"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "TeamStep updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "TeamStep"
+          ],
+          "summary": "Delete a teamstep by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "TeamStep deleted"
+            }
+          }
+        }
+      },
+      "/teammembers": {
+        "get": {
+          "tags": [
+            "TeamMember"
+          ],
+          "summary": "List all teammembers",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/TeamMember"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "TeamMember"
+          ],
+          "summary": "Create a new teammember",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/TeamMember"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "TeamMember created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "TeamMember"
+          ],
+          "summary": "Update a teammember by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/TeamMember"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "TeamMember updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "TeamMember"
+          ],
+          "summary": "Delete a teammember by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "TeamMember deleted"
+            }
+          }
+        }
+      },
+      "/chats": {
+        "get": {
+          "tags": [
+            "Chat"
+          ],
+          "summary": "List all chats",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Chat"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Chat"
+          ],
+          "summary": "Create a new chat",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Chat"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Chat created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Chat"
+          ],
+          "summary": "Update a chat by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Chat"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Chat updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Chat"
+          ],
+          "summary": "Delete a chat by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Chat deleted"
+            }
+          }
+        }
+      },
+      "/chatnotes": {
+        "get": {
+          "tags": [
+            "ChatNote"
+          ],
+          "summary": "List all chatnotes",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ChatNote"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "ChatNote"
+          ],
+          "summary": "Create a new chatnote",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ChatNote"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "ChatNote created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "ChatNote"
+          ],
+          "summary": "Update a chatnote by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ChatNote"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "ChatNote updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "ChatNote"
+          ],
+          "summary": "Delete a chatnote by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "ChatNote deleted"
+            }
+          }
+        }
+      },
+      "/teamchats": {
+        "get": {
+          "tags": [
+            "TeamChat"
+          ],
+          "summary": "List all teamchats",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/TeamChat"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "TeamChat"
+          ],
+          "summary": "Create a new teamchat",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/TeamChat"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "TeamChat created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "TeamChat"
+          ],
+          "summary": "Update a teamchat by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/TeamChat"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "TeamChat updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "TeamChat"
+          ],
+          "summary": "Delete a teamchat by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "TeamChat deleted"
+            }
+          }
+        }
+      },
+      "/chatproviders": {
+        "get": {
+          "tags": [
+            "ChatProvider"
+          ],
+          "summary": "List all chatproviders",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ChatProvider"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "ChatProvider"
+          ],
+          "summary": "Create a new chatprovider",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ChatProvider"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "ChatProvider created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "ChatProvider"
+          ],
+          "summary": "Update a chatprovider by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ChatProvider"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "ChatProvider updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "ChatProvider"
+          ],
+          "summary": "Delete a chatprovider by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "ChatProvider deleted"
+            }
+          }
+        }
+      },
+      "/chatinboxes": {
+        "get": {
+          "tags": [
+            "ChatInbox"
+          ],
+          "summary": "List all chatinboxs",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ChatInbox"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "ChatInbox"
+          ],
+          "summary": "Create a new chatinbox",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ChatInbox"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "ChatInbox created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "ChatInbox"
+          ],
+          "summary": "Update a chatinbox by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ChatInbox"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "ChatInbox updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "ChatInbox"
+          ],
+          "summary": "Delete a chatinbox by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "ChatInbox deleted"
+            }
+          }
+        }
+      },
+      "/contactgroups": {
+        "get": {
+          "tags": [
+            "ContactGroup"
+          ],
+          "summary": "List all contactgroups",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ContactGroup"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "ContactGroup"
+          ],
+          "summary": "Create a new contactgroup",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ContactGroup"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "ContactGroup created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "ContactGroup"
+          ],
+          "summary": "Update a contactgroup by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ContactGroup"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "ContactGroup updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "ContactGroup"
+          ],
+          "summary": "Delete a contactgroup by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "ContactGroup deleted"
+            }
+          }
+        }
+      },
+      "/contacts": {
+        "get": {
+          "tags": [
+            "Contact"
+          ],
+          "summary": "List all contacts",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Contact"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Contact"
+          ],
+          "summary": "Create a new contact",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Contact"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Contact created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Contact"
+          ],
+          "summary": "Update a contact by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Contact"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Contact updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Contact"
+          ],
+          "summary": "Delete a contact by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Contact deleted"
+            }
+          }
+        }
+      },
+      "/contactnotes": {
+        "get": {
+          "tags": [
+            "ContactNote"
+          ],
+          "summary": "List all contactnotes",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ContactNote"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "ContactNote"
+          ],
+          "summary": "Create a new contactnote",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ContactNote"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "ContactNote created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "ContactNote"
+          ],
+          "summary": "Update a contactnote by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ContactNote"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "ContactNote updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "ContactNote"
+          ],
+          "summary": "Delete a contactnote by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "ContactNote deleted"
+            }
+          }
+        }
+      },
+      "/contactfields": {
+        "get": {
+          "tags": [
+            "ContactField"
+          ],
+          "summary": "List all contactfields",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ContactField"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "ContactField"
+          ],
+          "summary": "Create a new contactfield",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ContactField"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "ContactField created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "ContactField"
+          ],
+          "summary": "Update a contactfield by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ContactField"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "ContactField updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "ContactField"
+          ],
+          "summary": "Delete a contactfield by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "ContactField deleted"
+            }
+          }
+        }
+      },
+      "/contactfieldvalues": {
+        "get": {
+          "tags": [
+            "ContactFieldValue"
+          ],
+          "summary": "List all contactfieldvalues",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ContactFieldValue"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "ContactFieldValue"
+          ],
+          "summary": "Create a new contactfieldvalue",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ContactFieldValue"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "ContactFieldValue created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "ContactFieldValue"
+          ],
+          "summary": "Update a contactfieldvalue by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ContactFieldValue"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "ContactFieldValue updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "ContactFieldValue"
+          ],
+          "summary": "Delete a contactfieldvalue by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "ContactFieldValue deleted"
+            }
+          }
+        }
+      },
+      "/chatresponsibles": {
+        "get": {
+          "tags": [
+            "ChatResponsible"
+          ],
+          "summary": "List all chatresponsibles",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ChatResponsible"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "ChatResponsible"
+          ],
+          "summary": "Create a new chatresponsible",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ChatResponsible"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "ChatResponsible created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "ChatResponsible"
+          ],
+          "summary": "Update a chatresponsible by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ChatResponsible"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "ChatResponsible updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "ChatResponsible"
+          ],
+          "summary": "Delete a chatresponsible by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "ChatResponsible deleted"
+            }
+          }
+        }
+      },
+      "/tags": {
+        "get": {
+          "tags": [
+            "Tag"
+          ],
+          "summary": "List all tags",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Tag"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Tag"
+          ],
+          "summary": "Create a new tag",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Tag"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Tag created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Tag"
+          ],
+          "summary": "Update a tag by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Tag"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Tag updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Tag"
+          ],
+          "summary": "Delete a tag by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Tag deleted"
+            }
+          }
+        }
+      },
+      "/contacttags": {
+        "get": {
+          "tags": [
+            "ContactTag"
+          ],
+          "summary": "List all contacttags",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ContactTag"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "ContactTag"
+          ],
+          "summary": "Create a new contacttag",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ContactTag"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "ContactTag created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "ContactTag"
+          ],
+          "summary": "Update a contacttag by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ContactTag"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "ContactTag updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "ContactTag"
+          ],
+          "summary": "Delete a contacttag by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "ContactTag deleted"
+            }
+          }
+        }
+      },
+      "/chattags": {
+        "get": {
+          "tags": [
+            "ChatTag"
+          ],
+          "summary": "List all chattags",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ChatTag"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "ChatTag"
+          ],
+          "summary": "Create a new chattag",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ChatTag"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "ChatTag created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "ChatTag"
+          ],
+          "summary": "Update a chattag by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ChatTag"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "ChatTag updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "ChatTag"
+          ],
+          "summary": "Delete a chattag by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "ChatTag deleted"
+            }
+          }
+        }
+      },
+      "/assistantfields": {
+        "get": {
+          "tags": [
+            "AssistantField"
+          ],
+          "summary": "List all assistantfields",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/AssistantField"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "AssistantField"
+          ],
+          "summary": "Create a new assistantfield",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/AssistantField"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "AssistantField created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "AssistantField"
+          ],
+          "summary": "Update a assistantfield by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/AssistantField"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "AssistantField updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "AssistantField"
+          ],
+          "summary": "Delete a assistantfield by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "AssistantField deleted"
+            }
+          }
+        }
+      },
+      "/assistantfieldvalues": {
+        "get": {
+          "tags": [
+            "AssistantFieldValue"
+          ],
+          "summary": "List all assistantfieldvalues",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/AssistantFieldValue"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "AssistantFieldValue"
+          ],
+          "summary": "Create a new assistantfieldvalue",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/AssistantFieldValue"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "AssistantFieldValue created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "AssistantFieldValue"
+          ],
+          "summary": "Update a assistantfieldvalue by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/AssistantFieldValue"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "AssistantFieldValue updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "AssistantFieldValue"
+          ],
+          "summary": "Delete a assistantfieldvalue by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "AssistantFieldValue deleted"
+            }
+          }
+        }
+      },
+      "/notificationtypes": {
+        "get": {
+          "tags": [
+            "NotificationType"
+          ],
+          "summary": "List all notificationtypes",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/NotificationType"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "NotificationType"
+          ],
+          "summary": "Create a new notificationtype",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/NotificationType"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "NotificationType created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "NotificationType"
+          ],
+          "summary": "Update a notificationtype by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/NotificationType"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "NotificationType updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "NotificationType"
+          ],
+          "summary": "Delete a notificationtype by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "NotificationType deleted"
+            }
+          }
+        }
+      },
+      "/notificationuserconfigurations": {
+        "get": {
+          "tags": [
+            "NotificationUserConfiguration"
+          ],
+          "summary": "List all notificationuserconfigurations",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/NotificationUserConfiguration"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "NotificationUserConfiguration"
+          ],
+          "summary": "Create a new notificationuserconfiguration",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/NotificationUserConfiguration"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "NotificationUserConfiguration created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "NotificationUserConfiguration"
+          ],
+          "summary": "Update a notificationuserconfiguration by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/NotificationUserConfiguration"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "NotificationUserConfiguration updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "NotificationUserConfiguration"
+          ],
+          "summary": "Delete a notificationuserconfiguration by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "NotificationUserConfiguration deleted"
+            }
+          }
+        }
+      },
+      "/usernotifications": {
+        "get": {
+          "tags": [
+            "UserNotification"
+          ],
+          "summary": "List all usernotifications",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/UserNotification"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "UserNotification"
+          ],
+          "summary": "Create a new usernotification",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/UserNotification"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "UserNotification created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "UserNotification"
+          ],
+          "summary": "Update a usernotification by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/UserNotification"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "UserNotification updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "UserNotification"
+          ],
+          "summary": "Delete a usernotification by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "UserNotification deleted"
+            }
+          }
+        }
+      },
+      "/predefinedmessages": {
+        "get": {
+          "tags": [
+            "PreDefinedMessage"
+          ],
+          "summary": "List all predefinedmessages",
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/PreDefinedMessage"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "PreDefinedMessage"
+          ],
+          "summary": "Create a new predefinedmessage",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/PreDefinedMessage"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "PreDefinedMessage created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "PreDefinedMessage"
+          ],
+          "summary": "Update a predefinedmessage by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/PreDefinedMessage"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "PreDefinedMessage updated"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "PreDefinedMessage"
+          ],
+          "summary": "Delete a predefinedmessage by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "PreDefinedMessage deleted"
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "User": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "Company": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "PermissionLevel": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "UserPermissionLevel": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "Assistant": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "Team": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "TeamStep": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "TeamMember": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "Chat": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatNote": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "TeamChat": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatProvider": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatInbox": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "ContactGroup": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "Contact": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "ContactNote": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "ContactField": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "ContactFieldValue": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatResponsible": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "Tag": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "ContactTag": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatTag": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "AssistantField": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "AssistantFieldValue": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "NotificationType": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "NotificationUserConfiguration": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "UserNotification": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "PreDefinedMessage": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }

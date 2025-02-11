@@ -1,0 +1,1581 @@
+Arquivo: src/@types/express.d.ts
+Conteúdo:
+declare namespace Express {
+  export interface Request {
+    user: {
+      id: string;
+    };
+  }
+}
+
+---
+
+Arquivo: src/config/envConfig.ts
+Conteúdo:
+import dotenv from 'dotenv';
+
+const envPath = `.env`;
+dotenv.config({ path: envPath });
+
+export const envConfig = {
+  database: {
+    host: process.env.DB_HOST,
+    port: +process.env.DB_PORT,
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
+  },
+  mainFolder: ['production', 'development'].includes(process.env.NODE_ENV)
+    ? 'dist/src'
+    : 'src',
+  appSecret: process.env.APP_SECRET || 'default_test',
+  appPort: process.env.APP_PORT || 3001,
+};
+
+---
+
+Arquivo: src/config/auth.ts
+Conteúdo:
+import dotenv from 'dotenv';
+import { envConfig } from './envConfig';
+dotenv.config({
+  path: `.env.${process.env.NODE_ENV}`,
+});
+
+const authConfig = {
+  jwt: {
+    secret: envConfig.appSecret,
+    expiresIn: '1d',
+  },
+  config_path: `${__dirname}`,
+};
+
+export default authConfig;
+
+---
+
+Arquivo: src/modules/users/infra/typeorm/entities/User.ts
+Conteúdo:
+import { Exclude } from 'class-transformer';
+import {
+  Entity,
+  Column,
+  ManyToMany,
+  OneToMany,
+  ManyToOne,
+  JoinTable,
+} from 'typeorm';
+
+import { PrimaryEntity } from '../../../../../shared/infra/typeorm/PrimaryEntity';
+
+@Entity('users')
+export class User extends PrimaryEntity {
+  @Column({ name: 'email' })
+  email: string;
+
+  @Exclude()
+  @Column({ name: 'password' })
+  password: string;
+
+  @Column({ name: 'name' })
+  name: string;
+}
+
+---
+
+Arquivo: src/modules/users/infra/typeorm/repositories/UserRepository.ts
+Conteúdo:
+import { inject, injectable } from 'tsyringe';
+import { DataSource, FindOptionsWhere } from 'typeorm';
+
+import { PrimaryRepository } from '../../../../../shared/infra/typeorm/PrimaryRepository';
+import { User } from '../entities/User';
+
+@injectable()
+class UserRepository extends PrimaryRepository<User> {
+  constructor(@inject('DATA_SOURCE_SQL') dataSource: DataSource) {
+    super(dataSource, User);
+  }
+
+  public async findByLogin(login: string): Promise<User | undefined> {
+    return this.findOne({
+      where: { email: login },
+    });
+  }
+}
+
+export default UserRepository;
+
+---
+
+Arquivo: src/modules/auth/infra/http/routes/authroutes.ts
+Conteúdo:
+import { AuthenticateUserController } from '@modules/auth/useCases/authenticateUser/AuthenticateUserController';
+import { RegisterUserController } from '@modules/auth/useCases/registerUser/RegisterUserController';
+import { Router } from 'express';
+import { validateLoginUser, validateRegisterUser } from '../validations/auth.validations';
+
+const authenticateUserController = new AuthenticateUserController();
+const registerUserController = new RegisterUserController();
+
+const authRouter = Router();
+
+authRouter.post('/login',validateLoginUser, authenticateUserController.handle);
+authRouter.post('/register',validateRegisterUser, registerUserController.handle);
+
+export default authRouter;
+
+---
+
+Arquivo: src/modules/auth/infra/http/validations/auth.validations.ts
+Conteúdo:
+import { Joi, Segments, celebrate } from 'celebrate';
+
+const validateRegisterUser = celebrate({
+  [Segments.BODY]: Joi.object().keys({
+    email: Joi.string().required(),
+    password: Joi.string().required(),
+    name: Joi.string().required()
+  }),
+});
+
+const validateLoginUser = celebrate({
+  [Segments.BODY]: Joi.object().keys({
+    email: Joi.string().required(),
+    password: Joi.string().required(),
+  }),
+});
+
+export { validateRegisterUser, validateLoginUser };
+
+---
+
+Arquivo: src/modules/auth/middleware/EnsureAuthenticateService.ts
+Conteúdo:
+import UserRepository from '@modules/users/infra/typeorm/repositories/UserRepository';
+import ErrorsApp from '@shared/errors/ErrorsApp';
+import { JwtService } from '@shared/plugins/jwt/JwtService';
+import { NextFunction, Request, Response } from 'express';
+import { container, injectable } from 'tsyringe';
+
+@injectable()
+export class EnsureAuthenticateService {
+  public async execute(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    const jwtService = container.resolve(JwtService);
+    const userRepository = container.resolve(UserRepository);
+
+    const header = request.headers.authorization;
+
+    if (!header) {
+      throw new ErrorsApp('JWT Token not found!', 401);
+    }
+
+    const [, token] = header.split(' ');
+
+    const { id: user_id } = await jwtService.verifyToken(token);
+
+    const user = await userRepository.findById(user_id);
+
+    if (!user) {
+      throw new ErrorsApp('Usuário não existe!', 401);
+    }
+
+    request.user = {
+      id: user_id,
+    };
+
+    return next();
+  }
+}
+
+---
+
+Arquivo: src/modules/auth/useCases/registerUser/RegisterUserController.ts
+Conteúdo:
+import { Request, Response } from 'express';
+import { container } from 'tsyringe';
+import { RegisterUserUseCase } from './RegisterUserUseCase';
+import { instanceToInstance } from 'class-transformer';
+
+export class RegisterUserController {
+  async handle(request: Request, response: Response): Promise<void> {
+    const { email, name, password } = request.body;
+    const registerUserUseCase = container.resolve(RegisterUserUseCase);
+
+    try {
+      const user = await registerUserUseCase.execute({
+        email,
+        password,
+        name
+      });
+
+      response.json({ success: true, user: instanceToInstance(user) });
+    } catch (err) {
+      response.status(400).json({ success: false, message: err.message });
+    }
+  }
+}
+
+---
+
+Arquivo: src/modules/auth/useCases/registerUser/RegisterUserUseCase.ts
+Conteúdo:
+import { IRegisterUserDTO } from "@modules/auth/dtos/IRegisterUserDTO";
+import { User } from "@modules/users/infra/typeorm/entities/User";
+import UserRepository from "@modules/users/infra/typeorm/repositories/UserRepository";
+import ErrorsApp from "@shared/errors/ErrorsApp";
+import { EncryptService } from "@shared/plugins/encrypt/EncryptService";
+import { IEncryptService } from "@shared/plugins/encrypt/IEncryptService";
+import { inject, injectable } from "tsyringe";
+
+@injectable()
+export class RegisterUserUseCase {
+    constructor(
+        @inject(UserRepository) private readonly userRepository: UserRepository,
+        @inject(EncryptService) private readonly encryptService: IEncryptService
+    ) {}
+
+    public async execute(data: IRegisterUserDTO): Promise<User> {
+        const user = await this.userRepository.findByLogin(data.email);
+
+        if(user) {
+            throw new ErrorsApp('Já existe um usuário cadastrado com esse email!', 409);
+        }
+
+        const newUser = new User();
+
+        newUser.email = data.email;
+        newUser.name = data.name;
+        newUser.password = await this.encryptService.encryptPassword(data.password);
+
+        return this.userRepository.save(newUser);
+    }
+}
+---
+
+Arquivo: src/modules/auth/useCases/authenticateUser/AuthenticateUserController.ts
+Conteúdo:
+import { Request, Response } from 'express';
+import { container } from 'tsyringe';
+
+import { AuthenticateUserUseCase } from './AuthenticateUserUseCase';
+
+export class AuthenticateUserController {
+  async handle(request: Request, response: Response): Promise<void> {
+    const { email, password } = request.body;
+    const authenticateUserUseCase = container.resolve(AuthenticateUserUseCase);
+
+    try {
+      const user = await authenticateUserUseCase.execute({
+        email,
+        password,
+      });
+
+      response.json({ token: user.token, user: user.user });
+    } catch (err) {
+      response.status(400).json({ success: false, message: err.message });
+    }
+  }
+}
+
+---
+
+Arquivo: src/modules/auth/useCases/authenticateUser/AuthenticateUserUseCase.ts
+Conteúdo:
+import { User } from '@modules/users/infra/typeorm/entities/User';
+import UserRepository from '@modules/users/infra/typeorm/repositories/UserRepository';
+import ErrorsApp from '@shared/errors/ErrorsApp';
+import { EncryptService } from '@shared/plugins/encrypt/EncryptService';
+import { IEncryptService } from '@shared/plugins/encrypt/IEncryptService';
+import { IJwtService } from '@shared/plugins/jwt/IJwtService';
+import { JwtService } from '@shared/plugins/jwt/JwtService';
+import { instanceToInstance } from 'class-transformer';
+import { inject, injectable } from 'tsyringe';
+
+interface IRequest {
+  email: string;
+  password: string;
+}
+
+interface IExecuteResponse {
+  user: User;
+  token: string;
+}
+
+@injectable()
+export class AuthenticateUserUseCase {
+  constructor(
+    @inject(UserRepository)
+    private readonly userRepository: UserRepository,
+
+    @inject(JwtService)
+    private readonly jwtService: IJwtService,
+
+    @inject(EncryptService)
+    private readonly encryptService: IEncryptService,
+  ) {}
+
+  async execute(data: IRequest): Promise<IExecuteResponse> {
+    const user = await this.userRepository.findByLogin(data.email);
+
+
+
+    if (!user) {
+      throw new ErrorsApp('Usuário ou senha incorreto!', 401);
+    }
+
+    const passwordMatched = await this.encryptService.comparePassword(
+      data.password,
+      user.password,
+    );
+
+    if (!passwordMatched) {
+      throw new ErrorsApp('Usuário ou senha incorreto!', 401);
+    }
+
+    const token = await this.jwtService.generateToken({ id: user.id });
+
+    return { user: instanceToInstance(user), token };
+  }
+}
+
+---
+
+Arquivo: src/modules/auth/dtos/IRegisterUserDTO.ts
+Conteúdo:
+export interface IRegisterUserDTO {
+  email: string;
+  name: string;
+  password: string;
+}
+
+---
+
+Arquivo: src/modules/tasks/infra/http/routes/taskroutes.ts
+Conteúdo:
+import { Router } from 'express';
+import CreateTaskController from '../../useCases/createTag/CreateTaskController';
+import ShowTaskController from '../../useCases/showTag/ShowTaskController';
+import UpdateTaskController from '../../useCases/updateTag/UpdateTaskController';
+import DeleteTaskController from '../../useCases/deleteTag/DeleteTaskController';
+import ListTaskController from '../../useCases/listTag/ListTaskController';
+import {
+  valdiateShowTask,
+  validateCreateTask,
+  validateDeleteTask,
+  validateUpdateTask,
+} from '../validations/task.validations';
+
+const createTaskController = new CreateTaskController();
+const showTaskController = new ShowTaskController();
+const updateTaskController = new UpdateTaskController();
+const deleteTaskController = new DeleteTaskController();
+const listTaskController = new ListTaskController();
+
+const taskRouter = Router();
+
+taskRouter.get('/task', listTaskController.handle);
+taskRouter.post('/task', validateCreateTask, createTaskController.handle);
+taskRouter.put('/task/:id', validateUpdateTask, updateTaskController.handle);
+taskRouter.delete('/task/:id', validateDeleteTask, deleteTaskController.handle);
+taskRouter.get('/task/:id', valdiateShowTask, showTaskController.handle);
+
+export default taskRouter;
+
+---
+
+Arquivo: src/modules/tasks/infra/http/validations/task.validations.ts
+Conteúdo:
+import { Joi, Segments, celebrate } from 'celebrate';
+
+const validateCreateTask = celebrate({
+  [Segments.BODY]: Joi.object().keys({
+    title: Joi.string().required(),
+    description: Joi.string().optional(),
+    status: Joi.string().valid('done','pending','in_progress').required()
+  }),
+});
+
+const validateUpdateTask = celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    id: Joi.string().required().uuid(),
+  }),
+  [Segments.BODY]: Joi.object().keys({
+    title: Joi.string().optional(),
+    description: Joi.string().optional(),
+    status: Joi.string().valid('done','pending','in_progress').optional()
+  }),
+});
+
+const validateDeleteTask = celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    id: Joi.string().required().uuid(),
+  })
+});
+
+const valdiateShowTask = celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    id: Joi.string().required().uuid(),
+  })
+});
+
+export { validateCreateTask, validateUpdateTask, valdiateShowTask, validateDeleteTask };
+---
+
+Arquivo: src/modules/tasks/infra/useCases/updateTag/UpdateTaskController.ts
+Conteúdo:
+import { instanceToInstance } from 'class-transformer';
+import { Request, Response } from 'express';
+import { container } from 'tsyringe';
+import { UpdateTaskUseCase } from './UpdateTaskUseCase';
+
+class UpdateTaskController {
+  async handle(request: Request, response: Response): Promise<void> {
+    const { id: task_id } = request.params;
+    const { id: user_id } = request.user;
+    const data = request.body;
+
+    try {
+      const updateTaskUseCase = container.resolve(UpdateTaskUseCase);
+
+      const task = await updateTaskUseCase.execute(user_id, task_id, data);
+
+      response.json({ success: true, task: instanceToInstance(task) });
+    } catch (err) {
+      response
+        .status(err.statusCode)
+        .json({ success: false, message: err.message });
+    }
+  }
+}
+
+export default UpdateTaskController;
+
+---
+
+Arquivo: src/modules/tasks/infra/useCases/updateTag/UpdateTaskUseCase.ts
+Conteúdo:
+import { inject, injectable } from 'tsyringe';
+import TaskRepository from '../../typeorm/repositories/TaskRepository';
+import ErrorsApp from '@shared/errors/ErrorsApp';
+import { Task } from '../../typeorm/entities/Task';
+import { ICreateTaskDTO } from '@modules/tasks/dtos/ICreateTaskDTO';
+
+@injectable()
+export class UpdateTaskUseCase {
+  constructor(
+    @inject(TaskRepository) private readonly taskRepository: TaskRepository,
+  ) {}
+
+  public async execute(
+    user_id: string,
+    task_id: string,
+    data: Partial<ICreateTaskDTO>,
+  ): Promise<Task> {
+    const task = await this.taskRepository.findById(task_id);
+
+    if (!task) throw new ErrorsApp('Registro não encontrado!', 404);
+
+    const canUserUpdateTask = task.user_id === user_id;
+
+    if (!canUserUpdateTask)
+      throw new ErrorsApp('Usuário não pode deletar essa tarefa!', 401);
+
+    return this.taskRepository.save(Object.assign(task, data));
+  }
+}
+
+---
+
+Arquivo: src/modules/tasks/infra/useCases/listTag/ListTaskController.ts
+Conteúdo:
+import { instanceToInstance } from 'class-transformer';
+import { Request, Response } from 'express';
+import { container } from 'tsyringe';
+import { ListTaskUseCase } from './ListTaskUseCase';
+
+class ListTaskController {
+  async handle(request: Request, response: Response): Promise<void> {
+    const { id: user_id } = request.user;
+
+    try {
+      const listTaskUseCase = container.resolve(ListTaskUseCase);
+
+      const tasks = await listTaskUseCase.execute(user_id);
+
+      response.json({ success: true, tasks: instanceToInstance(tasks) });
+    } catch (err) {
+      response
+        .status(err.statusCode)
+        .json({ success: false, message: err.message });
+    }
+  }
+}
+export default ListTaskController;
+
+---
+
+Arquivo: src/modules/tasks/infra/useCases/listTag/ListTaskUseCase.ts
+Conteúdo:
+import { inject, injectable } from "tsyringe";
+import TaskRepository from "../../typeorm/repositories/TaskRepository";
+import { Task } from "../../typeorm/entities/Task";
+
+@injectable()
+export class ListTaskUseCase {
+    constructor(
+        @inject(TaskRepository) private readonly taskRepository: TaskRepository
+    ) {}
+
+    public async execute(user_id: string): Promise<Task[]> {
+        return this.taskRepository.findByUserId(user_id);
+    }
+}
+---
+
+Arquivo: src/modules/tasks/infra/useCases/deleteTag/DeleteTaskUseCase.ts
+Conteúdo:
+import { inject, injectable } from "tsyringe";
+import TaskRepository from "../../typeorm/repositories/TaskRepository";
+import ErrorsApp from "@shared/errors/ErrorsApp";
+
+@injectable()
+export class DeleteTaskUseCase {
+    constructor(
+        @inject(TaskRepository) private readonly taskRepository: TaskRepository,
+    ) {}
+
+    public async execute(user_id: string, task_id: string): Promise<void> {
+        const task = await this.taskRepository.findById(task_id);
+
+        if (!task) throw new ErrorsApp('Registro não encontrado!', 404);
+
+        const canUserDeleteTask = task.user_id === user_id;
+
+        if(!canUserDeleteTask) throw new ErrorsApp('Usuário não pode deletar essa tarefa!', 401);
+
+        await this.taskRepository.remove(task);
+    }
+}
+---
+
+Arquivo: src/modules/tasks/infra/useCases/deleteTag/DeleteTaskController.ts
+Conteúdo:
+import { Request, Response } from 'express';
+import { container } from 'tsyringe';
+import { DeleteTaskUseCase } from './DeleteTaskUseCase';
+
+class DeleteTaskController {
+  async handle(request: Request, response: Response): Promise<void> {
+    const { id: task_id } = request.params;
+    const { id: user_id } = request.user;
+
+    try {
+      const deleteTaskUseCase = container.resolve(DeleteTaskUseCase);
+
+      await deleteTaskUseCase.execute(user_id, task_id);
+
+      response.status(204).send();
+    } catch (err) {
+      console.log(err);
+      response
+        .status(err.statusCode)
+        .json({ success: false, message: err.message });
+    }
+  }
+}
+export default DeleteTaskController;
+
+---
+
+Arquivo: src/modules/tasks/infra/useCases/showTag/ShowTaskUseCase.ts
+Conteúdo:
+import { inject, injectable } from "tsyringe";
+import TaskRepository from "../../typeorm/repositories/TaskRepository";
+import UserRepository from "@modules/users/infra/typeorm/repositories/UserRepository";
+import ErrorsApp from "@shared/errors/ErrorsApp";
+import { Task } from "../../typeorm/entities/Task";
+
+@injectable()
+export class ShowTaskUseCase {
+    constructor(
+        @inject(TaskRepository) private readonly taskRepository: TaskRepository,
+        @inject(UserRepository) private readonly userRepository: UserRepository
+    ) {}
+
+    public async execute(task_id: string, user_id: string): Promise<Task> {
+        const task = await this.taskRepository.findById(task_id);
+
+        if (!task) throw new ErrorsApp('Registro não encontrado!', 404);
+
+        const canUserGeteTask = task.user_id === user_id;
+    
+        if (!canUserGeteTask)
+          throw new ErrorsApp('Usuário não pode deletar essa tarefa!', 401);    
+    
+        return task;   
+    }
+}
+---
+
+Arquivo: src/modules/tasks/infra/useCases/showTag/ShowTaskController.ts
+Conteúdo:
+import { Request, Response } from 'express';
+import { container } from 'tsyringe';
+import { ShowTaskUseCase } from './ShowTaskUseCase';
+
+class ShowTaskController {
+  async handle(request: Request, response: Response): Promise<void> {
+    const { id: task_id } = request.params;
+    const { id: user_id } = request.user;
+
+    try {
+      const showTaskUseCase = container.resolve(ShowTaskUseCase);
+
+      const task = await showTaskUseCase.execute(task_id, user_id);
+
+      response.json({ success: true, task });
+    } catch (err) {
+      response
+        .status(err.statusCode)
+        .json({ success: false, message: err.message });
+    }
+  }
+}
+export default ShowTaskController;
+
+---
+
+Arquivo: src/modules/tasks/infra/useCases/createTag/CreateTaskUseCase.ts
+Conteúdo:
+import { ICreateTaskDTO } from "@modules/tasks/dtos/ICreateTaskDTO";
+import { inject, injectable } from "tsyringe";
+import { Task } from "../../typeorm/entities/Task";
+import TaskRepository from "../../typeorm/repositories/TaskRepository";
+
+@injectable()
+export class CreateTaskUseCase {
+    constructor(
+        @inject(TaskRepository) private readonly taskRepository: TaskRepository
+    ) {}
+
+    public async execute(data: ICreateTaskDTO): Promise<Task> {
+        return this.taskRepository.save(Object.assign(new Task(), data));
+    }
+}
+---
+
+Arquivo: src/modules/tasks/infra/useCases/createTag/CreateTaskController.ts
+Conteúdo:
+import { Request, Response } from 'express';
+import { container } from 'tsyringe';
+import { CreateTaskUseCase } from './CreateTaskUseCase';
+
+class CreateTaskController {
+  async handle(request: Request, response: Response): Promise<void> {
+    const data = request.body;
+    const { id: user_id } = request.user;
+
+    try {
+      const createTaskUseCase = container.resolve(CreateTaskUseCase)
+      const task = await createTaskUseCase.execute({...data, user_id });
+
+      response.status(201).json({ success: true, task });
+    } catch (err) {
+      response
+        .status(err.statusCode)
+        .json({ success: false, message: err.message });
+    }
+  }
+}
+export default CreateTaskController;
+
+---
+
+Arquivo: src/modules/tasks/infra/typeorm/entities/Task.ts
+Conteúdo:
+import {
+  Entity,
+  Column
+} from 'typeorm';
+
+import { PrimaryEntity } from '../../../../../shared/infra/typeorm/PrimaryEntity';
+import { TaskStatusEnum } from '@modules/tasks/enum/TaskStatusEnum';
+
+@Entity('tasks')
+export class Task extends PrimaryEntity {
+    @Column({ name: 'user_id'})
+    user_id: string;
+
+    @Column({ name: 'title' })
+    title: string;
+
+    @Column({ name: 'description' })
+    description: string;
+
+    @Column({ name: 'status', type: 'varchar' })
+    status: TaskStatusEnum;
+}
+---
+
+Arquivo: src/modules/tasks/infra/typeorm/repositories/TaskRepository.ts
+Conteúdo:
+import { inject, injectable } from 'tsyringe';
+import { DataSource, FindOptionsWhere } from 'typeorm';
+
+import { PrimaryRepository } from '../../../../../shared/infra/typeorm/PrimaryRepository';
+import { Task } from '../entities/Task';
+
+@injectable()
+class TaskRepository extends PrimaryRepository<Task> {
+  constructor(@inject('DATA_SOURCE_SQL') dataSource: DataSource) {
+    super(dataSource, Task);
+  }
+
+  public async findByUserId(user_id:string): Promise<Task[]> {
+    return this.find({
+      where: {
+        user_id
+      }
+    })
+  }
+}
+
+export default TaskRepository;
+
+---
+
+Arquivo: src/modules/tasks/dtos/ICreateTaskDTO.ts
+Conteúdo:
+import { TaskStatusEnum } from "../enum/TaskStatusEnum";
+
+export interface ICreateTaskDTO {
+    user_id: string;
+    title: string;
+    description: string;
+    status: TaskStatusEnum;
+}
+---
+
+Arquivo: src/modules/tasks/enum/TaskStatusEnum.ts
+Conteúdo:
+export enum TaskStatusEnum {
+    DONE = 'done',
+    PENDING = 'pending',
+    IN_PROGRESS = 'in_progress'
+}
+---
+
+Arquivo: src/shared/plugins/jwt/IJwtService.ts
+Conteúdo:
+import { IJwtPayload, ITokenPayload } from './JwtService';
+
+export interface IJwtService {
+  generateToken(payload: IJwtPayload): Promise<string>;
+  verifyToken(token: string): Promise<ITokenPayload>;
+}
+
+---
+
+Arquivo: src/shared/plugins/jwt/tests/unit/JwtService.spec.ts
+Conteúdo:
+/* eslint-disable no-shadow */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import authConfig from '@config/auth';
+import jwt from 'jsonwebtoken';
+
+import { JwtService, IJwtPayload, ITokenPayload } from '../../JwtService';
+
+jest.mock('jsonwebtoken');
+
+describe('JwtService', () => {
+  const jwtService = new JwtService();
+  const payload: IJwtPayload = { id: 'user-id' };
+  const token = 'generated-token';
+  const decodedToken: ITokenPayload = {
+    iat: 123456,
+    exp: 12345678,
+    id: 'user-id',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should generate a token with the correct payload and config', async () => {
+    const signSpy = jest
+      .spyOn(jwt, 'sign')
+      .mockImplementation((payload, secret, options, callback) => {
+        return token;
+      });
+
+    const result = await jwtService.generateToken(payload);
+
+    expect(signSpy).toHaveBeenCalledWith(payload, authConfig.jwt.secret, {
+      expiresIn: authConfig.jwt.expiresIn,
+    });
+    expect(result).toBe(token);
+  });
+
+  it('should verify a token and return the decoded payload', async () => {
+    const verifySpy = jest
+      .spyOn(jwt, 'verify')
+      .mockImplementation((token, secret, callback) => {
+        return decodedToken;
+      });
+
+    const result = await jwtService.verifyToken(token);
+
+    expect(verifySpy).toHaveBeenCalledWith(token, authConfig.jwt.secret);
+    expect(result).toEqual(decodedToken);
+  });
+
+  it('should throw an error if token generation fails', async () => {
+    const signSpy = jest.spyOn(jwt, 'sign').mockImplementation(() => {
+      throw new Error('Token generation failed');
+    });
+
+    await expect(jwtService.generateToken(payload)).rejects.toThrow(
+      'Token generation failed',
+    );
+  });
+
+  it('should throw an error if token verification fails', async () => {
+    const verifySpy = jest.spyOn(jwt, 'verify').mockImplementation(() => {
+      throw new Error('Invalid token');
+    });
+
+    await expect(jwtService.verifyToken(token)).rejects.toThrow(
+      'Invalid token',
+    );
+  });
+});
+
+---
+
+Arquivo: src/shared/plugins/jwt/JwtService.ts
+Conteúdo:
+import authConfig from '@config/auth';
+import jwt from 'jsonwebtoken';
+
+export interface IJwtPayload {
+  id: string;
+}
+
+export interface ITokenPayload {
+  iat: number;
+  exp: number;
+  id: string;
+}
+
+export class JwtService {
+  public async generateToken(payloads: IJwtPayload): Promise<string> {
+    const { secret, expiresIn } = authConfig.jwt;
+
+    const token = await jwt.sign(payloads, secret, { expiresIn });
+
+    return token;
+  }
+
+  public async verifyToken(token: string): Promise<ITokenPayload> {
+    const decoded = await jwt.verify(token, authConfig.jwt.secret);
+
+    return decoded as ITokenPayload;
+  }
+}
+
+---
+
+Arquivo: src/shared/plugins/encrypt/tests/unit/EncryptService.spec.ts
+Conteúdo:
+import bcrypt from 'bcrypt';
+
+import { EncryptService } from '../../EncryptService';
+
+jest.mock('bcrypt');
+
+describe('EncryptService', () => {
+  const password = 'plainPassword';
+  const hashedPassword = 'hashedPassword';
+  let encryptService: EncryptService;
+
+  beforeEach(() => {
+    encryptService = new EncryptService();
+    jest.clearAllMocks();
+  });
+
+  it('should encrypt the password using bcrypt', async () => {
+    (bcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
+
+    const result = await encryptService.encryptPassword(password);
+
+    expect(bcrypt.hash).toHaveBeenCalledWith(password, 10);
+    expect(result).toBe(hashedPassword);
+  });
+
+  it('should return true when passwords match', async () => {
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+    const result = await encryptService.comparePassword(
+      password,
+      hashedPassword,
+    );
+
+    expect(bcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
+    expect(result).toBe(true);
+  });
+
+  it('should return false when passwords do not match', async () => {
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+    const result = await encryptService.comparePassword(
+      password,
+      hashedPassword,
+    );
+
+    expect(bcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
+    expect(result).toBe(false);
+  });
+
+  it('should handle errors thrown by bcrypt.hash', async () => {
+    (bcrypt.hash as jest.Mock).mockRejectedValue(new Error('Hash error'));
+
+    await expect(encryptService.encryptPassword(password)).rejects.toThrow(
+      'Hash error',
+    );
+  });
+
+  it('should handle errors thrown by bcrypt.compare', async () => {
+    (bcrypt.compare as jest.Mock).mockRejectedValue(new Error('Compare error'));
+
+    await expect(
+      encryptService.comparePassword(password, hashedPassword),
+    ).rejects.toThrow('Compare error');
+  });
+});
+
+---
+
+Arquivo: src/shared/plugins/encrypt/IEncryptService.ts
+Conteúdo:
+export interface IEncryptService {
+  encryptPassword(password: string): Promise<string>;
+  comparePassword(
+    password: string,
+    encryptedPassword: string,
+  ): Promise<boolean>;
+}
+
+---
+
+Arquivo: src/shared/plugins/encrypt/EncryptService.ts
+Conteúdo:
+import bcrypt from 'bcrypt';
+import { injectable } from 'tsyringe';
+
+import { IEncryptService } from './IEncryptService';
+
+@injectable()
+export class EncryptService implements IEncryptService {
+  private readonly SALT: number;
+  constructor() {
+    this.SALT = 10;
+  }
+  async encryptPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, this.SALT);
+  }
+
+  async comparePassword(
+    password: string,
+    encryptedPassword: string,
+  ): Promise<boolean> {
+    const isValid = await bcrypt.compare(password, encryptedPassword);
+    return isValid;
+  }
+}
+
+---
+
+Arquivo: src/shared/utils/errorsMessageCelebrate.ts
+Conteúdo:
+import { CelebrateError } from 'celebrate';
+
+interface IData {
+  field: string;
+  type: string;
+  validValues?: string;
+}
+
+interface IResponse {
+  message: string;
+  field: string;
+}
+
+const translateField = (field: string): string => {
+  switch (field) {
+    case 'name':
+    case 'user.name':
+      return 'nome';
+    case 'password':
+    case 'user.password':
+      return 'senha';
+    case 'user.email':
+      return 'email';
+    case 'user.role':
+      return 'role';
+    default:
+      return field;
+  }
+};
+
+const messages = ({ field, type, validValues }: IData): IResponse => {
+  switch (type) {
+    case 'any.required':
+      return {
+        message: `O campo ${translateField(field)} é obrigatório`,
+        field,
+      };
+    case 'object.unknown':
+      return {
+        message: `O campo ${translateField(field)} não e permitido`,
+        field,
+      };
+    case 'string.pattern.base':
+      return {
+        message: `O campo ${translateField(field)} está com formato inválido`,
+        field,
+      };
+    case 'string.email':
+      return {
+        message: `O campo ${translateField(field)} está com formato inválido`,
+        field,
+      };
+    case 'array.base':
+      return {
+        message: `O campo ${translateField(field)} deve ser um array`,
+        field,
+      };
+    case 'number.base':
+      return {
+        message: `O campo ${translateField(field)} deve ser um número`,
+        field,
+      };
+    case 'string.empty':
+      return {
+        message: `O campo ${translateField(field)} não pode estar vazio`,
+        field,
+      };
+    case 'any.only':
+      return {
+        message: `Para o campo ${translateField(
+          field,
+        )} os valores permitidos são [${validValues}]`,
+        field,
+      };
+    case 'string.guid':
+      return {
+        message: `O campo ${translateField(field)} deve ser um UUID válido`,
+        field,
+      };
+    default:
+      return {
+        message: '',
+        field,
+      };
+  }
+};
+
+const errorsMessageCelebrate = (err: CelebrateError): IResponse => {
+  let message: IResponse = {} as IResponse;
+  err.details.forEach(val => {
+    const field = val.details[0].context?.label || '';
+    const { type } = val.details[0];
+
+    message = messages({
+      field,
+      type,
+      validValues: type === 'any.only' ? val.details[0].context?.valids : '',
+    });
+  });
+
+  return message;
+};
+
+export { errorsMessageCelebrate };
+
+---
+
+Arquivo: src/shared/utils/ListEntityUseCase.ts
+Conteúdo:
+import { IFilterQuery } from '@shared/helpers/filter/typeorm/FilterBuilder';
+import { PrimaryEntity } from '@shared/infra/typeorm/PrimaryEntity';
+import { PrimaryRepository } from '@shared/infra/typeorm/PrimaryRepository';
+import { inject, injectable } from 'tsyringe';
+
+export interface IResponse<T> {
+  total: number;
+  total_page: number;
+  result: T[];
+}
+
+@injectable()
+class ListEntityUseCase<T extends PrimaryEntity> {
+  constructor(
+    @inject(PrimaryRepository) private readonly repository: PrimaryRepository<T>,
+  ) {}
+
+  public async execute(query: IFilterQuery): Promise<IResponse<T>> {
+    const [result, total] = await this.repository.findAll(query);
+
+    const response: IResponse<T> = {
+      result,
+      total,
+      total_page: Math.ceil(total / query.per_page),
+    };
+
+    return response;
+  }
+}
+
+export default ListEntityUseCase;
+
+---
+
+Arquivo: src/shared/utils/getErrorResponse.ts
+Conteúdo:
+interface ErrorResponse {
+  code: number;
+  title: string;
+  message: string;
+}
+
+const ErrorDictionary = {
+  'foreign key constraint': {
+    code: 400,
+    title: 'Erro de Dependência',
+    message:
+      'Este registro está vinculado a outros registros e não pode ser removido. Por favor, entre em contato com o suporte se precisar de assistência.',
+  },
+  'not-null constraint': {
+    code: 400,
+    title: 'Campo Obrigatório',
+    message:
+      'Um campo obrigatório está ausente. Por favor, verifique sua entrada e tente novamente.',
+  },
+  'unique constraint': {
+    code: 400,
+    title: 'Entrada Duplicada',
+    message:
+      'Um registro com este valor já existe. Por favor, use um valor diferente.',
+  },
+  'check constraint': {
+    code: 400,
+    title: 'Valor Inválido',
+    message:
+      'Um valor inválido foi fornecido. Por favor, reveja sua entrada e tente novamente.',
+  },
+  'value too long': {
+    code: 400,
+    title: 'Valor Muito Longo',
+    message:
+      'O valor fornecido é muito longo. Por favor, reduza-o e tente novamente.',
+  },
+  'record not found': {
+    code: 404,
+    title: 'Registro Não Encontrado',
+    message:
+      'O registro solicitado não foi encontrado. Por favor, verifique as informações e tente novamente.',
+  },
+  'server error': {
+    code: 500,
+    title: 'Erro no Servidor',
+    message:
+      'Ocorreu um erro interno no servidor. Por favor, tente novamente mais tarde. Se o problema persistir, entre em contato com o suporte.',
+  },
+  'invalid input syntax': {
+    code: 400,
+    title: 'Entrada Inválida',
+    message:
+      'A entrada está em um formato inválido. Por favor, verifique sua entrada e tente novamente.',
+  },
+  'authentication failed': {
+    code: 401,
+    title: 'Falha de Autenticação',
+    message:
+      'A autenticação falhou. Por favor, verifique suas credenciais e tente novamente.',
+  },
+  'authorization failed': {
+    code: 403,
+    title: 'Falha de Autorização',
+    message:
+      'Você não está autorizado a acessar este recurso. Se você acredita que isto é um erro, entre em contato com o suporte.',
+  },
+  'service unavailable': {
+    code: 503,
+    title: 'Serviço Indisponível',
+    message:
+      'O serviço está temporariamente indisponível. Por favor, tente novamente mais tarde.',
+  },
+  'connection error': {
+    code: 503,
+    title: 'Erro de Conexão',
+    message:
+      'Erro de conexão com o banco de dados. Por favor, tente novamente mais tarde.',
+  },
+  'timeout error': {
+    code: 504,
+    title: 'Erro de Tempo Esgotado',
+    message:
+      'O servidor demorou muito para responder. Por favor, tente novamente.',
+  },
+  'invalid request format': {
+    code: 400,
+    title: 'Requisição Inválida',
+    message:
+      'O formato da requisição é inválido. Por favor, verifique a documentação e tente novamente.',
+  },
+  'constraint violation': {
+    code: 400,
+    title: 'Violação de Restrição',
+    message:
+      'Há uma violação de restrição. Por favor, reveja sua entrada e tente novamente.',
+  },
+  'data corruption': {
+    code: 500,
+    title: 'Corrupção de Dados',
+    message:
+      'Corrupção de dados detectada. Por favor, entre em contato com o suporte para obter assistência.',
+  },
+  'user login not found': {
+    code: 401,
+    title: 'Login Não Encontrado',
+    message:
+      'Login incorreto. Por favor, verifique suas credenciais e tente novamente.',
+  },
+  'password not match': {
+    code: 401,
+    title: 'Senha Incorreta',
+    message:
+      'Senha incorreta. Por favor, verifique suas credenciais e tente novamente.',
+  },
+};
+
+const getErrorResponse = (errorMessage: string): ErrorResponse => {
+  const matchedKey = Object.keys(ErrorDictionary).find(key =>
+    errorMessage.includes(key),
+  ) as keyof typeof ErrorDictionary | undefined;
+
+  if (matchedKey) {
+    // eslint-disable-next-line security/detect-object-injection
+    return ErrorDictionary[matchedKey];
+  }
+
+  return ErrorDictionary['server error'];
+};
+
+export { getErrorResponse };
+
+---
+
+Arquivo: src/shared/errors/ErrorsApp.ts
+Conteúdo:
+class ErrorsApp extends Error {
+  public readonly message: string;
+
+  public readonly statusCode: number;
+
+  constructor(message: string, statusCode = 400) {
+    super();
+    this.message = message;
+    this.statusCode = statusCode;
+  }
+}
+
+export default ErrorsApp;
+
+---
+
+Arquivo: src/shared/infra/http/middlewares/errorHandling.ts
+Conteúdo:
+import ErrorsApp from '@shared/errors/ErrorsApp';
+import { errorsMessageCelebrate } from '@shared/utils/errorsMessageCelebrate';
+import { getErrorResponse } from '@shared/utils/getErrorResponse';
+import { isCelebrateError } from 'celebrate';
+import { Request, Response, NextFunction } from 'express';
+
+const errorHandling = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  err: Error | any,
+  request: Request,
+  response: Response,
+  _next: NextFunction,
+): Promise<void> => {
+  console.error(err);
+  if (err instanceof ErrorsApp) {
+    response
+      .status(err.statusCode)
+      .json({ success: false, message: err.message });
+    return
+  }
+
+  if (isCelebrateError(err)) {
+    response.status(400).json(errorsMessageCelebrate(err));
+    return
+  }
+
+  const mappedError = getErrorResponse(err.message || err.toString());
+
+  response.status(mappedError.code).json({
+    success: false,
+    title: mappedError.title,
+    message: mappedError.message,
+  });
+  return
+};
+
+export default errorHandling;
+
+---
+
+Arquivo: src/shared/infra/http/routes/index.ts
+Conteúdo:
+import authRouter from "@modules/auth/infra/http/routes/authroutes";
+import { EnsureAuthenticateService } from "@modules/auth/middleware/EnsureAuthenticateService";
+import taskRouter from "@modules/tasks/infra/http/routes/taskroutes";
+import { Router } from "express";
+import { container } from "tsyringe";
+
+const routes = Router();
+routes.use(authRouter);
+
+routes.use(container.resolve(EnsureAuthenticateService).execute);
+
+routes.use(taskRouter);
+
+export default routes;
+
+---
+
+Arquivo: src/shared/infra/http/server.ts
+Conteúdo:
+import consola from 'consola';
+import '@shared/container';
+
+import app from './app';
+import { envConfig } from '@config/envConfig';
+import http from 'http';
+
+const server = http.createServer(app);
+
+const port = envConfig.appPort;
+server.listen(port, () => {
+  consola.info(`Back-end started on localhost:${port}! 🚀`);
+});
+
+---
+
+Arquivo: src/shared/infra/http/app.ts
+Conteúdo:
+import 'reflect-metadata';
+import 'dotenv/config';
+import cors from 'cors';
+import express from 'express';
+import 'express-async-errors';
+
+import errorHandling from './middlewares/errorHandling';
+import routes from './routes';
+
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.get('/', (req, res) => {
+  res.send('Hello World !');
+});
+
+app.use(routes);
+app.use(errorHandling);
+
+export default app;
+
+---
+
+Arquivo: src/shared/infra/typeorm/postgresOrmConfig.ts
+Conteúdo:
+import { envConfig } from '@config/envConfig';
+import consola from 'consola';
+import { DataSource } from 'typeorm';
+
+export const PostgresDataSource = new DataSource({
+  type: 'postgres',
+  host: envConfig.database.host,
+  port: envConfig.database.port,
+  username: envConfig.database.username,
+  password: envConfig.database.password,
+  database: envConfig.database.database,
+  migrations: [
+    `./${envConfig.mainFolder}/shared/infra/typeorm/migrations/*{.ts,.js}`,
+  ],
+  entities: [
+    `./${envConfig.mainFolder}/modules/**/infra/typeorm/entities/*{.ts,.js}`,
+  ],
+  logging: false,
+  synchronize: false,
+});
+
+PostgresDataSource.initialize()
+  .then(() => {
+    return consola.success(
+      'Conexão com o banco de dados postgres realizada com sucesso',
+    );
+  })
+  .catch(err => {
+    return consola.error('Erro ao conectar com o banco de dados postgres', err);
+  });
+
+---
+
+Arquivo: src/shared/infra/typeorm/PrimaryRepository.ts
+Conteúdo:
+import { inject, injectable } from 'tsyringe';
+import {
+  DataSource,
+  EntityTarget,
+  FindOptionsWhere,
+  In,
+  Repository,
+} from 'typeorm';
+
+import { PrimaryEntity } from './PrimaryEntity';
+
+@injectable()
+export class PrimaryRepository<T extends PrimaryEntity> extends Repository<T> {
+  constructor(
+    @inject('DATA_SOURCE_SQL') dataSource: DataSource,
+    private readonly entity: EntityTarget<T>,
+  ) {
+    super(entity, dataSource.createEntityManager());
+  }
+
+  public async findById(id: string): Promise<T | undefined> {
+    return this.findOne({
+      where: { id } as FindOptionsWhere<T>,
+    });
+  }
+}
+
+---
+
+Arquivo: src/shared/infra/typeorm/migrations/1739120031480-CreateTableUsers.ts
+Conteúdo:
+import { MigrationInterface, QueryRunner } from "typeorm";
+
+export class CreateTableUsers1739120031480 implements MigrationInterface {
+
+    public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
+        CREATE TABLE users (
+            id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),    
+            name VARCHAR(100) NOT NULL,
+            email VARCHAR(100) NOT NULL UNIQUE,
+            password VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP
+        );
+    
+        `);
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
+            DROP TABLE users;    
+        `);
+    }
+
+}
+
+---
+
+Arquivo: src/shared/infra/typeorm/migrations/1739120038060-CreateTableTasks.ts
+Conteúdo:
+import { MigrationInterface, QueryRunner } from "typeorm";
+
+export class CreateTableTasks1739120038060 implements MigrationInterface {
+
+    public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
+        CREATE TABLE tasks (
+            id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),    
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            title VARCHAR(255) NOT NULL,
+            description TEXT,
+            status VARCHAR(20) CHECK (status IN ('pending', 'in_progress', 'done')) DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP
+        );   
+        `);
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
+            DROP TABLE tasks;    
+        `);
+    }
+
+}
+
+---
+
+Arquivo: src/shared/infra/typeorm/PrimaryEntity.ts
+Conteúdo:
+import {
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
+
+export abstract class PrimaryEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  created_at: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', nullable: true })
+  updated_at: Date;
+}
+
+---
+
+Arquivo: src/shared/container/index.ts
+Conteúdo:
+import 'reflect-metadata';
+import { container } from 'tsyringe';
+
+import { PrimaryRepository } from '../infra/typeorm/PrimaryRepository';
+import { PostgresDataSource } from '@shared/infra/typeorm/postgresOrmConfig';
+import TaskRepository from '@modules/tasks/infra/typeorm/repositories/TaskRepository';
+import UserRepository from '@modules/users/infra/typeorm/repositories/UserRepository';
+
+container.register('DATA_SOURCE_SQL', {
+  useValue: PostgresDataSource,
+});
+
+container.registerSingleton(PrimaryRepository);
+
+container.registerSingleton<UserRepository>(UserRepository);
+container.resolve<TaskRepository>(TaskRepository)
+---
+
+Arquivo: src/shared/container/providers/index.ts
+Conteúdo:
+
+---
+
