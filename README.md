@@ -137,7 +137,7 @@ Após iniciar os containers, acesse:
 ✅ Acessar: `http://localhost:3000` (Frontend) e `http://localhost:3001` (API)  
 
 ### **Testes**
-✅ Estar com o container do banco de teste radando ( iniciado no passo anterior )
+✅ Estar com o container do banco de teste radando (iniciado no passo anterior)
 ✅ Criar `.env.test`: `cp .env.example api/.env.test`  
 ✅ Rodar `yarn test:integration`  
 
