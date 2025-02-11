@@ -47,5 +47,15 @@ services:
       - /usr/src/app/node_modules
     command: sh -c "yarn migration:run && yarn dev"
 
+  todo-frontend:
+    container_name: todo-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - todo-api
+
 volumes:
   pg_data:
