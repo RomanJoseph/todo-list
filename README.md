@@ -121,7 +121,7 @@ NEXT_PUBLIC_API_URL=https://minhaapi.com
 Execute o seguinte comando:
 
 ```bash
-docker-compose -f docker-compose.prod.yml --env-file .env.production up --build -d
+docker compose -f docker-compose.prod.yml --env-file .env.production up --build -d
 ```
 
 ### **3️⃣ Acessar a aplicação em produção**
