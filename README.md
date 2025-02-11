@@ -1,9 +1,3 @@
-Aqui está um **README.md** detalhado para o seu projeto. Ele inclui instruções para **configuração, desenvolvimento, testes e produção**.  
-
----
-
-### 📜 **README.md**
-```md
 # 📝 TODO API & Frontend
 
 Este projeto é uma aplicação full-stack contendo uma **API em Node.js (Express)** e um **Frontend em Next.js**.  
@@ -69,7 +63,6 @@ Após iniciar os containers, acesse:
 Se precisar visualizar os logs:
 ```bash
 docker-compose logs -f
-```
 
 ---
 
