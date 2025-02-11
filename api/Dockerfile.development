@@ -1,0 +1,19 @@
+FROM node:22
+
+# Diretório de trabalho dentro do container
+WORKDIR /usr/src/app
+
+# Copia apenas arquivos de dependência primeiro (para otimizar cache)
+COPY package*.json ./
+
+# Instala todas as dependências (incluindo devDependencies)
+RUN yarn install
+
+# Copia todo o código-fonte
+COPY . .
+
+# Exponha a porta que a sua API escuta (ex: 3001)
+EXPOSE 3001
+
+# Comando padrão (modo desenvolvimento)
+CMD ["sh", "-c", "yarn migration:run && yarn dev"]

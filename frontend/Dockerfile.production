@@ -1,0 +1,35 @@
+# -------------------------
+# Etapa 1: Build da aplicação Next
+# -------------------------
+FROM node:22 as builder
+
+WORKDIR /usr/src/app
+
+COPY package*.json package-lock.json ./
+RUN yarn install
+
+COPY . .
+
+# Faz o build de produção do Next
+RUN yarn build
+
+# -------------------------
+# Etapa 2: Cria a imagem final, leve, apenas com o que precisamos para rodar
+# -------------------------
+FROM node:22 as runner
+
+WORKDIR /usr/src/app
+
+# Copia somente as dependências necessárias em produção
+COPY --from=builder /usr/src/app/package*.json ./
+RUN yarn install --production
+
+# Copia os arquivos buildados (.next) e a pasta public
+COPY --from=builder /usr/src/app/.next ./.next
+COPY --from=builder /usr/src/app/public ./public
+
+EXPOSE 3000
+
+# Roda o Next em modo produção
+CMD ["yarn", "start"]
+    

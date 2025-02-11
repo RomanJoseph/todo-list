@@ -1,0 +1,51 @@
+services:
+  # Banco de dados principal (produção e desenvolvimento)
+  postgres:
+    image: postgres
+    container_name: todo-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  postgres-test:
+    image: postgres
+    container_name: todo-postgres-test
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    tmpfs: /var/lib/postgresql/data
+
+  # API principal
+  todo-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.development
+    container_name: todo-api
+    restart: always
+    ports:
+      - "${API_PORT}:3001"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_DATABASE: ${POSTGRES_DB}
+    depends_on:
+      - postgres
+    volumes:
+      - ./api:/usr/src/app
+      - /usr/src/app/node_modules
+    command: sh -c "yarn migration:run && yarn dev"
+
+volumes:
+  pg_data:
