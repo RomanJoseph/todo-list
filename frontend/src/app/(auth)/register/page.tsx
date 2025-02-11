@@ -21,7 +21,7 @@ const RegisterPage: React.FC = () => {
       route.push("/");
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        message.error(err?.response.data.message || "Algo deu errado na hora de registrar");
+        message.error(err?.response?.data.message || "Algo deu errado na hora de registrar");
       } else {
         message.error("Ocorreu um erro desconhecido");
       }
