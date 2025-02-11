@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
       route.push('/tasks');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        message.error(err?.response.data.message || "Algo deu errado na hora de de fazer login");
+        message.error(err?.response?.data.message || "Algo deu errado na hora de de fazer login");
       } else {
         message.error("Ocorreu um erro desconhecido");
       }
